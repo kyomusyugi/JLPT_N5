@@ -148,7 +148,7 @@ export const words_06_10: Word[] = [
   { kanji: "耳", hiragana: "みみ", meaning: "귀" },
   { kanji: "触る", hiragana: "さわる", meaning: "접촉하다, 손으로 만지다, 관여하다, 거슬리다" },
   { kanji: "僕", hiragana: "ぼく", meaning: "나" },
-  { kanji: "英語", hiragana: "えいご", meaning: "영화" },
+  { kanji: "英語", hiragana: "えいご", meaning: "영어" },
   { kanji: "散歩", hiragana: "さんぽ", meaning: "산책" },
   { kanji: "速成", hiragana: "そくせい", meaning: "속성, 빨리 이루어짐" },
   { kanji: "図書館", hiragana: "としょかん", meaning: "도서관" },
