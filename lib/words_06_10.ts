@@ -90,7 +90,7 @@ export const words_06_10: Word[] = [
   { kanji: "荷物", hiragana: "にもつ", meaning: "짐, 화물" },
   { kanji: "株", hiragana: "かぶ", meaning: "주식, 그루, 포기" },
   { kanji: "台風", hiragana: "たいふう", meaning: "태풍" },
-  { kanji: "多く", hiragana: "おおく", meaning: "많음, 대개" },
+  { kanji: "多い", hiragana: "おおい", meaning: "많다, 많이 있다" },
   { kanji: "ずり下がる", hiragana: "ずりさがる", meaning: "흘러내리다" },
   { kanji: "一杯", hiragana: "いっぱい", meaning: "한 잔, 한 그릇" },
   { kanji: "起こる", hiragana: "おこる", meaning: "발생하다, 생기다, 일어나다" },
