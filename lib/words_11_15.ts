@@ -110,7 +110,7 @@ export const words_11_15: Word[] = [
   { kanji: "建てる", hiragana: "たてる", meaning: "세우다, 짓다" },
   { kanji: "皮膚", hiragana: "ひふ", meaning: "피부" },
   { kanji: "試合", hiragana: "しあい", meaning: "시합" },
-  { kanji: "痛み", hiragana: "痛み", meaning: "아픔, 통증" },
+  { kanji: "痛み", hiragana: "いたみ", meaning: "아픔, 통증" },
   { kanji: "結構", hiragana: "けっこう", meaning: "꽤, 그런대로, 충분함, 이제 됐음" },
   { kanji: "事件", hiragana: "じけん", meaning: "사건" },
   { kanji: "感じる", hiragana: "かんじる", meaning: "느끼다" },
