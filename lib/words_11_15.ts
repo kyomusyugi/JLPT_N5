@@ -1,4 +1,4 @@
-// lib/words_11_16.ts
+// lib/words_11_15.ts
 
 export type Word = {
   kanji: string;
