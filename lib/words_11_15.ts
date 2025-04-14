@@ -6,7 +6,7 @@ export type Word = {
   meaning: string;
 };
 
-export const words_11_16: Word[] = [
+export const words_11_15: Word[] = [
   { kanji: "四", hiragana: "し, よん", meaning: "4" },
   { kanji: "夕飯", hiragana: "ゆうはん", meaning: "저녁밥" },
   { kanji: "同じ", hiragana: "おなじ", meaning: "같음, 통일" },
