@@ -39,7 +39,7 @@ export const words_11_15: Word[] = [
   { kanji: "砂糖", hiragana: "さとう", meaning: "설탕" },
   { kanji: "ほくろ", hiragana: "", meaning: "점, 흑자" },
   { kanji: "半々", hiragana: "はんはん", meaning: "반반, 반반씩" },
-  { kanji: "壊す", hiragana: "こわす", meaning: "파괴하다, 고장내다, 탈을 내다, 망치다" },
+  { kanji: "壊す", hiragana: "こわす", meaning: "부수다, 고장내다, 탈을 내다, 망치다" },
   { kanji: "入れる", hiragana: "いれる", meaning: "넣다, 속에 집어넣다, 들어가게 하다" },
   { kanji: "組", hiragana: "くみ", meaning: "조, 반, 쌍, 짝" },
   { kanji: "円やか", hiragana: "まろやか", meaning: "둥근 모양, 둥그스름한 모양" },
