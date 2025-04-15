@@ -138,7 +138,7 @@ export const words_11_15: Word[] = [
   { kanji: "使う", hiragana: "つかう", meaning: "쓰다, 사용하다" },
   { kanji: "山盛り", hiragana: "やまもり", meaning: "고봉으로 담다, 산처럼 수북이" },
   { kanji: "軽い", hiragana: "かるい", meaning: "가볍다" },
-  { kanji: "盛る", hiragana: "もる", meaning: "그릇에 많이 담다, 높이 쌓아 올리다" },
+  { kanji: "盛る", hiragana: "もる", meaning: "많이 담다, 쌓아 올리다" },
   { kanji: "告白", hiragana: "こくはく", meaning: "고백" },
   { kanji: "貸す", hiragana: "かす", meaning: "빌려주다, 이용하게 하다" },
   { kanji: "仮に", hiragana: "かりに", meaning: "만일, 만약, 임시로" },
