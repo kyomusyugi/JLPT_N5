@@ -158,7 +158,7 @@ export const words_06_10: Word[] = [
   { kanji: "お客さん", hiragana: "おきゃくさん", meaning: "손님" },
   { kanji: "斜線", hiragana: "しゃせん", meaning: "사선" },
   { kanji: "立て込む", hiragana: "たてこむ", meaning: "붐비다, 혼잡하다" },
-  { kanji: "引く", hiragana: "ひく", meaning: "끌다, 긋다, 빼다" },
+  { kanji: "引く", hiragana: "ひく", meaning: "끌다, 긋다, 빼다, 당기다" },
   { kanji: "高い", hiragana: "たかい", meaning: "높다, 비싸다" },
   { kanji: "勉強", hiragana: "べんきょう", meaning: "공부" },
   { kanji: "低い", hiragana: "ひくい", meaning: "낮다, 작다, 짧다" },
