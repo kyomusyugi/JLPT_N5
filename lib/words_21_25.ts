@@ -76,7 +76,7 @@ export const words_21_25: Word[] = [
   { kanji: "雪", hiragana: "ゆき", meaning: "눈" },
   { kanji: "好き", hiragana: "すき", meaning: "좋아하다" },
   { kanji: "歩く", hiragana: "あるく", meaning: "걷다" },
-  { kanji: "土曜日", hiragana: "とようび", meaning: "토요일" },
+  { kanji: "土曜日", hiragana: "どようび", meaning: "토요일" },
   { kanji: "来週", hiragana: "らいしゅう", meaning: "다음 주" },
   { kanji: "辛い", hiragana: "からい", meaning: "맵다" },
   { kanji: "少し", hiragana: "すこし", meaning: "조금, 약간, 좀" },
