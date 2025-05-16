@@ -237,8 +237,3 @@ export default function QuizPage({
     </div>
   );
 }
-
-      )}
-    </div>
-  );
-}
