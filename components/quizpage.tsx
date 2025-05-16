@@ -35,7 +35,6 @@ export default function QuizPage({
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
-  const [enterEnabled, setEnterEnabled] = useState(false);
 
   useEffect(() => {
     const shuffled = shuffle(words);
@@ -78,7 +77,6 @@ export default function QuizPage({
 
     setIsCorrect(correct);
     setShowFeedback(true);
-    setEnterEnabled(true);
 
     const answerRecord: AnswerRecord = {
       word: currentWord,
@@ -99,7 +97,6 @@ export default function QuizPage({
     setUserHiragana("");
     setShowFeedback(false);
     setIsCorrect(false);
-    setEnterEnabled(false);
 
     if (nextIndex < shuffledWords.length) {
       setCurrentIndex(nextIndex);
@@ -108,23 +105,24 @@ export default function QuizPage({
     }
   };
 
+  // 뜻 입력란에서 엔터 눌렀을 때 (IME 중이면 무시, 피드백 전이면 제출)
   const onKeyDownKanji = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       if (isComposing) return;
       if (!showFeedback) {
         e.preventDefault();
         handleSubmit();
+      } else {
+        e.preventDefault();
+        handleNext();
       }
     }
   };
 
+  // 히라가나 입력란에서는 엔터 이벤트 무시 (입력 자유롭게)
   const onKeyDownHiragana = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      if (isComposing) return;
-      if (showFeedback && enterEnabled) {
-        e.preventDefault();
-        handleNext();
-      }
+      e.preventDefault();
     }
   };
 
@@ -194,7 +192,6 @@ export default function QuizPage({
         onCompositionStart={() => setIsComposing(true)}
         onCompositionEnd={() => setIsComposing(false)}
         onKeyDown={onKeyDownKanji}
-        onFocus={() => setEnterEnabled(false)}
       />
       <input
         type="text"
@@ -206,7 +203,6 @@ export default function QuizPage({
         onCompositionStart={() => setIsComposing(true)}
         onCompositionEnd={() => setIsComposing(false)}
         onKeyDown={onKeyDownHiragana}
-        onFocus={() => setEnterEnabled(false)}
       />
       {!showFeedback ? (
         <button
