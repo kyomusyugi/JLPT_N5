@@ -34,6 +34,7 @@ export default function QuizPage({
   const [isCorrect, setIsCorrect] = useState(false);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const [showResult, setShowResult] = useState(false);
+
   const isComposing = useRef(false);
 
   useEffect(() => {
@@ -41,18 +42,48 @@ export default function QuizPage({
     setShuffledWords(shuffled);
   }, [words]);
 
-  const currentWord = shuffledWords[currentIndex];
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (isComposing.current) return;
+      if (e.key === "Enter") {
+        if (!showFeedback) {
+          handleSubmit();
+        } else {
+          handleNext();
+        }
+      }
+    };
 
-  const normalize = (text: string) =>
-    text
-      .trim()
-      .replace(/\s/g, "")
-      .split(/[,\s]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const handleCompositionStart = () => {
+      isComposing.current = true;
+    };
+    const handleCompositionEnd = () => {
+      isComposing.current = false;
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("compositionstart", handleCompositionStart);
+    document.addEventListener("compositionend", handleCompositionEnd);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("compositionstart", handleCompositionStart);
+      document.removeEventListener("compositionend", handleCompositionEnd);
+    };
+  }, [showFeedback, currentIndex]);
+
+  const currentWord = shuffledWords[currentIndex];
 
   const handleSubmit = () => {
     if (!currentWord) return;
+
+    const normalize = (text: string) =>
+      text
+        .trim()
+        .replace(/\s/g, "")
+        .split(/[,\s]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
 
     const userAnswers = normalize(userKanji);
     const correctAnswers = normalize(currentWord.meaning);
@@ -99,20 +130,6 @@ export default function QuizPage({
       setCurrentIndex(nextIndex);
     } else {
       setShowResult(true);
-    }
-  };
-
-  const handleKanjiKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !isComposing.current && !showFeedback) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
-
-  const handleHiraganaKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !isComposing.current && showFeedback) {
-      e.preventDefault();
-      handleNext();
     }
   };
 
@@ -170,9 +187,6 @@ export default function QuizPage({
         placeholder="뜻 입력"
         value={userKanji}
         onChange={(e) => setUserKanji(e.target.value)}
-        onKeyDown={handleKanjiKeyDown}
-        onCompositionStart={() => { isComposing.current = true; }}
-        onCompositionEnd={() => { isComposing.current = false; }}
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
       />
@@ -181,9 +195,6 @@ export default function QuizPage({
         placeholder="히라가나 입력"
         value={userHiragana}
         onChange={(e) => setUserHiragana(e.target.value)}
-        onKeyDown={handleHiraganaKeyDown}
-        onCompositionStart={() => { isComposing.current = true; }}
-        onCompositionEnd={() => { isComposing.current = false; }}
         className="w-full mb-4 p-2 border rounded"
         disabled={showFeedback}
       />
