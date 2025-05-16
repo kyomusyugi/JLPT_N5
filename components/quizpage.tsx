@@ -157,7 +157,6 @@ export default function QuizPage({
         placeholder="뜻 입력"
         value={userKanji}
         onChange={(e) => setUserKanji(e.target.value)}
-        onKeyDown={(e) => {
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
       />
@@ -179,7 +178,7 @@ export default function QuizPage({
         </button>
       ) : (
         <div className="space-y-3">
-          <p className={`text-center font-semibold ${isCorrect ? "text-green-600" : "text-red-600"}`}>
+          <p className={text-center font-semibold ${isCorrect ? "text-green-600" : "text-red-600"}}>
             {isCorrect ? "정답입니다! 🎉" : "오답입니다."}
           </p>
           <div className="text-sm text-gray-700 bg-gray-100 p-3 rounded">
