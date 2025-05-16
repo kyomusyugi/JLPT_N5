@@ -1,23 +1,4 @@
-"use client";
-
-import { useState, useEffect, KeyboardEvent } from "react";
-
-export type Word = {
-  kanji: string;
-  hiragana: string;
-  meaning: string;
-};
-
-function shuffle(array: Word[]) {
-  return [...array].sort(() => Math.random() - 0.5);
-}
-
-type AnswerRecord = {
-  word: Word;
-  userKanji: string;
-  userHiragana: string;
-  isCorrect: boolean;
-};
+import { useState, useEffect, useRef } from "react";
 
 export default function QuizPage({
   words,
@@ -34,48 +15,50 @@ export default function QuizPage({
   const [isCorrect, setIsCorrect] = useState(false);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const [showResult, setShowResult] = useState(false);
-  const [isComposing, setIsComposing] = useState(false);
+
+  const kanjiInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const shuffled = shuffle(words);
     setShuffledWords(shuffled);
-    setCurrentIndex(0);
-    setUserKanji("");
-    setUserHiragana("");
-    setShowFeedback(false);
-    setIsCorrect(false);
-    setAnswers([]);
-    setShowResult(false);
   }, [words]);
 
-  const currentWord = shuffledWords[currentIndex];
+  useEffect(() => {
+    if (!showFeedback && kanjiInputRef.current) {
+      kanjiInputRef.current.focus();
+    }
+  }, [currentIndex, showFeedback]);
 
-  const normalize = (text: string) =>
-    text
-      .trim()
-      .replace(/\s+/g, "")
-      .split(/[,\s]+/)
-      .map((s) => s.trim())
-      .filter(Boolean);
+  const currentWord = shuffledWords[currentIndex];
 
   const handleSubmit = () => {
     if (!currentWord) return;
 
-    const userKanjiAnswers = normalize(userKanji);
-    const correctMeanings = normalize(currentWord.meaning);
+    const normalize = (text: string) =>
+      text
+        .trim()
+        .replace(/\s/g, "")
+        .split(/[,\s]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
 
-    const meaningMatch = userKanjiAnswers.some((ans) =>
-      correctMeanings.includes(ans)
+    const userAnswers = normalize(userKanji);
+    const correctAnswers = normalize(currentWord.meaning);
+
+    const meaningMatch = userAnswers.some((answer) =>
+      correctAnswers.includes(answer)
     );
 
     const isKanaOnly = (text: string) => /^[\u3040-\u30FF]+$/.test(text);
     const requiresHiragana = !isKanaOnly(currentWord.kanji);
 
-    const userHiraganaAnswers = normalize(userHiragana);
-    const correctHiraganaAnswers = normalize(currentWord.hiragana);
+    const userHiraganaNormalized = normalize(userHiragana);
+    const correctHiraganaNormalized = normalize(currentWord.hiragana);
 
     const hiraganaMatch = requiresHiragana
-      ? userHiraganaAnswers.some((ans) => correctHiraganaAnswers.includes(ans))
+      ? userHiraganaNormalized.some((answer) =>
+          correctHiraganaNormalized.includes(answer)
+        )
       : true;
 
     const correct = meaningMatch && hiraganaMatch;
@@ -83,23 +66,22 @@ export default function QuizPage({
     setIsCorrect(correct);
     setShowFeedback(true);
 
-    setAnswers((prev) => [
-      ...prev,
-      {
-        word: currentWord,
-        userKanji,
-        userHiragana,
-        isCorrect: correct,
-      },
-    ]);
+    const answerRecord: AnswerRecord = {
+      word: currentWord,
+      userKanji,
+      userHiragana,
+      isCorrect: correct,
+    };
+
+    setAnswers((prev) => [...prev, answerRecord]);
   };
 
   const handleNext = () => {
     const nextIndex = currentIndex + 1;
+
     setUserKanji("");
     setUserHiragana("");
     setShowFeedback(false);
-    setIsCorrect(false);
 
     if (nextIndex < shuffledWords.length) {
       setCurrentIndex(nextIndex);
@@ -108,20 +90,7 @@ export default function QuizPage({
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Enter" && !isComposing) {
-      e.preventDefault();
-
-      if (!showFeedback) {
-        handleSubmit();
-      } else {
-        handleNext();
-      }
-    }
-  };
-
-  if (shuffledWords.length === 0)
-    return <div className="p-4">로딩 중...</div>;
+  if (shuffledWords.length === 0) return <div className="p-4">로딩 중...</div>;
 
   if (showResult) {
     const incorrectAnswers = answers.filter((a) => !a.isCorrect);
@@ -158,9 +127,7 @@ export default function QuizPage({
             </ul>
           </>
         ) : (
-          <p className="text-green-600 font-semibold">
-            모든 문제를 정확히 맞혔어요! 🎉
-          </p>
+          <p className="text-green-600 font-semibold">모든 문제를 정확히 맞혔어요! 🎉</p>
         )}
 
         <button
@@ -174,11 +141,7 @@ export default function QuizPage({
   }
 
   return (
-    <div
-      className="p-4 max-w-md mx-auto"
-      onKeyDown={handleKeyDown}
-      tabIndex={0}
-    >
+    <div className="p-4 max-w-md mx-auto">
       <div className="mb-4">
         <p className="text-sm text-gray-500">
           문제 {currentIndex + 1} / {shuffledWords.length}
@@ -187,12 +150,11 @@ export default function QuizPage({
       </div>
 
       <input
+        ref={kanjiInputRef}
         type="text"
         placeholder="뜻 입력"
         value={userKanji}
         onChange={(e) => setUserKanji(e.target.value)}
-        onCompositionStart={() => setIsComposing(true)}
-        onCompositionEnd={() => setIsComposing(false)}
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
       />
@@ -201,8 +163,6 @@ export default function QuizPage({
         placeholder="히라가나 입력"
         value={userHiragana}
         onChange={(e) => setUserHiragana(e.target.value)}
-        onCompositionStart={() => setIsComposing(true)}
-        onCompositionEnd={() => setIsComposing(false)}
         className="w-full mb-4 p-2 border rounded"
         disabled={showFeedback}
       />
@@ -234,7 +194,6 @@ export default function QuizPage({
           <button
             onClick={handleNext}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full"
-            autoFocus
           >
             다음 문제
           </button>
