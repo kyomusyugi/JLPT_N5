@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export type Word = {
   kanji: string;
@@ -35,23 +35,41 @@ export default function QuizPage({
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const [showResult, setShowResult] = useState(false);
 
+  const imeModeRef = useRef(false);
+
   useEffect(() => {
     const shuffled = shuffle(words);
     setShuffledWords(shuffled);
   }, [words]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (imeModeRef.current) return;
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        if (showFeedback) {
+          handleNext();
+        } else {
+          handleSubmit();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showFeedback, userKanji, userHiragana, shuffledWords, currentIndex]);
+
   const currentWord = shuffledWords[currentIndex];
+
+  const normalize = (text: string) =>
+    text
+      .split(/[,\s]+/)
+      .map((s) => s.replace(/\s/g, "").trim())
+      .filter(Boolean);
 
   const handleSubmit = () => {
     if (!currentWord) return;
-
-    const normalize = (text: string) =>
-      text
-        .trim()
-        .replace(/\s/g, "")
-        .split(/[,\s]+/)
-        .map((s) => s.trim())
-        .filter(Boolean);
 
     const userAnswers = normalize(userKanji);
     const correctAnswers = normalize(currentWord.meaning);
@@ -100,33 +118,6 @@ export default function QuizPage({
       setShowResult(true);
     }
   };
-
-  // ⌨️ Enter 키 핸들링
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // IME 조합 중이면 무시
-      if (e.isComposing || e.keyCode === 229) return;
-      if (e.key !== "Enter") return;
-
-      const activeElement = document.activeElement as HTMLElement;
-      const isInput =
-        activeElement?.tagName === "INPUT" ||
-        activeElement?.tagName === "TEXTAREA";
-
-      if (!showFeedback) {
-        // 입력 단계: 입력창에 포커스 있을 때만 제출
-        if (isInput) {
-          handleSubmit();
-        }
-      } else {
-        // 피드백 단계: 어디서든 다음 문제로 이동
-        handleNext();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showFeedback, currentWord]);
 
   if (shuffledWords.length === 0) return <div className="p-4">로딩 중...</div>;
 
@@ -184,6 +175,8 @@ export default function QuizPage({
         onChange={(e) => setUserKanji(e.target.value)}
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
+        onCompositionStart={() => (imeModeRef.current = true)}
+        onCompositionEnd={() => (imeModeRef.current = false)}
       />
       <input
         type="text"
@@ -192,6 +185,8 @@ export default function QuizPage({
         onChange={(e) => setUserHiragana(e.target.value)}
         className="w-full mb-4 p-2 border rounded"
         disabled={showFeedback}
+        onCompositionStart={() => (imeModeRef.current = true)}
+        onCompositionEnd={() => (imeModeRef.current = false)}
       />
 
       {!showFeedback ? (
