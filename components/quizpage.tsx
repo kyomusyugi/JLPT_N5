@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 
 export type Word = {
   kanji: string;
@@ -34,38 +34,22 @@ export default function QuizPage({
   const [isCorrect, setIsCorrect] = useState(false);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const [showResult, setShowResult] = useState(false);
-
-  const imeModeRef = useRef(false);
+  const [isComposing, setIsComposing] = useState(false);
 
   useEffect(() => {
     const shuffled = shuffle(words);
     setShuffledWords(shuffled);
   }, [words]);
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (imeModeRef.current) return;
-
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (showFeedback) {
-          handleNext();
-        } else {
-          handleSubmit();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showFeedback, userKanji, userHiragana, shuffledWords, currentIndex]);
-
   const currentWord = shuffledWords[currentIndex];
 
+  // 공백을 모두 제거하고 쉼표로 나눈 뒤 각 항목 트림하는 normalize 함수
   const normalize = (text: string) =>
     text
-      .split(/[,\s]+/)
-      .map((s) => s.replace(/\s/g, "").trim())
+      .trim()
+      .replace(/\s+/g, "") // 모든 공백 제거
+      .split(",")
+      .map((s) => s.trim())
       .filter(Boolean);
 
   const handleSubmit = () => {
@@ -74,8 +58,8 @@ export default function QuizPage({
     const userAnswers = normalize(userKanji);
     const correctAnswers = normalize(currentWord.meaning);
 
-    const meaningMatch = userAnswers.some((answer) =>
-      correctAnswers.includes(answer)
+    const meaningMatch = userAnswers.some((ua) =>
+      correctAnswers.includes(ua)
     );
 
     const isKanaOnly = (text: string) => /^[\u3040-\u30FF]+$/.test(text);
@@ -85,8 +69,8 @@ export default function QuizPage({
     const correctHiraganaNormalized = normalize(currentWord.hiragana);
 
     const hiraganaMatch = requiresHiragana
-      ? userHiraganaNormalized.some((answer) =>
-          correctHiraganaNormalized.includes(answer)
+      ? userHiraganaNormalized.some((ua) =>
+          correctHiraganaNormalized.includes(ua)
         )
       : true;
 
@@ -136,11 +120,21 @@ export default function QuizPage({
             <ul className="space-y-3">
               {incorrectAnswers.map((item, idx) => (
                 <li key={idx} className="bg-white p-4 rounded shadow">
-                  <p><strong>문제 단어:</strong> {item.word.kanji}</p>
-                  <p><strong>정답 의미:</strong> {item.word.meaning}</p>
-                  <p><strong>정답 히라가나:</strong> {item.word.hiragana}</p>
-                  <p><strong>당신의 답 (뜻):</strong> {item.userKanji}</p>
-                  <p><strong>당신의 답 (히라가나):</strong> {item.userHiragana}</p>
+                  <p>
+                    <strong>문제 단어:</strong> {item.word.kanji}
+                  </p>
+                  <p>
+                    <strong>정답 의미:</strong> {item.word.meaning}
+                  </p>
+                  <p>
+                    <strong>정답 히라가나:</strong> {item.word.hiragana}
+                  </p>
+                  <p>
+                    <strong>당신의 답 (뜻):</strong> {item.userKanji}
+                  </p>
+                  <p>
+                    <strong>당신의 답 (히라가나):</strong> {item.userHiragana}
+                  </p>
                 </li>
               ))}
             </ul>
@@ -175,8 +169,14 @@ export default function QuizPage({
         onChange={(e) => setUserKanji(e.target.value)}
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
-        onCompositionStart={() => (imeModeRef.current = true)}
-        onCompositionEnd={() => (imeModeRef.current = false)}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => setIsComposing(false)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !isComposing && !showFeedback) {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
       />
       <input
         type="text"
@@ -185,8 +185,14 @@ export default function QuizPage({
         onChange={(e) => setUserHiragana(e.target.value)}
         className="w-full mb-4 p-2 border rounded"
         disabled={showFeedback}
-        onCompositionStart={() => (imeModeRef.current = true)}
-        onCompositionEnd={() => (imeModeRef.current = false)}
+        onCompositionStart={() => setIsComposing(true)}
+        onCompositionEnd={() => setIsComposing(false)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !isComposing && !showFeedback) {
+            e.preventDefault();
+            handleSubmit();
+          }
+        }}
       />
 
       {!showFeedback ? (
@@ -198,12 +204,27 @@ export default function QuizPage({
         </button>
       ) : (
         <div className="space-y-3">
-          <p className={`text-center font-semibold ${isCorrect ? "text-green-600" : "text-red-600"}`}>
+          <p
+            className={`text-center font-semibold ${
+              isCorrect ? "text-green-600" : "text-red-600"
+            }`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleNext();
+              }
+            }}
+            tabIndex={0}
+          >
             {isCorrect ? "정답입니다! 🎉" : "오답입니다."}
           </p>
           <div className="text-sm text-gray-700 bg-gray-100 p-3 rounded">
-            <p><strong>정답 의미:</strong> {currentWord.meaning}</p>
-            <p><strong>정답 히라가나:</strong> {currentWord.hiragana}</p>
+            <p>
+              <strong>정답 의미:</strong> {currentWord.meaning}
+            </p>
+            <p>
+              <strong>정답 히라가나:</strong> {currentWord.hiragana}
+            </p>
           </div>
           <button
             onClick={handleNext}
@@ -212,6 +233,11 @@ export default function QuizPage({
             다음 문제
           </button>
         </div>
+      )}
+    </div>
+  );
+}
+
       )}
     </div>
   );
