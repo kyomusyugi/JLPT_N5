@@ -82,3 +82,4 @@ export const words_06_10: Word[] = [
   { kanji: "病気", hiragana: "びょうき", meaning: "병, 질병" },
   { kanji: "消える", hiragana: "きえる", meaning: "꺼지다, 사라지다, 없어지다" },
   { kanji: "死ぬ", hiragana: "しぬ", meaning: "죽다" },
+];
