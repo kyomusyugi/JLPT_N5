@@ -72,6 +72,7 @@ export default function QuizPage({
         )
       : true;
 
+
     const correct = meaningMatch && hiraganaMatch;
 
     setIsCorrect(correct);
@@ -100,21 +101,6 @@ export default function QuizPage({
       setShowResult(true);
     }
   };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter") {
-        if (!showFeedback) {
-          handleSubmit();
-        } else {
-          handleNext();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [showFeedback, userKanji, userHiragana, currentIndex, shuffledWords]);
 
   if (shuffledWords.length === 0) return <div className="p-4">로딩 중...</div>;
 
@@ -146,6 +132,7 @@ export default function QuizPage({
           <p className="text-green-600 font-semibold">모든 문제를 정확히 맞혔어요! 🎉</p>
         )}
 
+        {/* 🌀 처음으로 돌아가기 버튼 */}
         <button
           onClick={onBack}
           className="mt-6 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
@@ -170,6 +157,7 @@ export default function QuizPage({
         placeholder="뜻 입력"
         value={userKanji}
         onChange={(e) => setUserKanji(e.target.value)}
+        onKeyDown={(e) => {
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
       />
