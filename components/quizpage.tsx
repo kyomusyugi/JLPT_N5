@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, KeyboardEvent } from "react";
 
-type Word = {
+export type Word = {
   kanji: string;
   hiragana: string;
   meaning: string;
@@ -38,14 +38,16 @@ export default function QuizPage({
   const kanjiInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setShuffledWords(shuffle(words));
+    const shuffled = shuffle(words);
+    setShuffledWords(shuffled);
+    setCurrentIndex(0);
+    setUserKanji("");
+    setUserHiragana("");
+    setShowFeedback(false);
+    setIsCorrect(false);
+    setAnswers([]);
+    setShowResult(false);
   }, [words]);
-
-  useEffect(() => {
-    if (kanjiInputRef.current && !showFeedback) {
-      kanjiInputRef.current.focus();
-    }
-  }, [currentIndex, showFeedback]);
 
   const currentWord = shuffledWords[currentIndex];
 
@@ -60,25 +62,21 @@ export default function QuizPage({
   const handleSubmit = () => {
     if (!currentWord) return;
 
-    if (userKanji.trim() === "" && userHiragana.trim() === "") return;
+    const userKanjiAnswers = normalize(userKanji);
+    const correctMeanings = normalize(currentWord.meaning);
 
-    const userAnswers = normalize(userKanji);
-    const correctAnswers = normalize(currentWord.meaning);
-
-    const meaningMatch = userAnswers.some((answer) =>
-      correctAnswers.includes(answer)
+    const meaningMatch = userKanjiAnswers.some((ans) =>
+      correctMeanings.includes(ans)
     );
 
     const isKanaOnly = (text: string) => /^[\u3040-\u30FF]+$/.test(text);
     const requiresHiragana = !isKanaOnly(currentWord.kanji);
 
-    const userHiraganaNormalized = normalize(userHiragana);
-    const correctHiraganaNormalized = normalize(currentWord.hiragana);
+    const userHiraganaAnswers = normalize(userHiragana);
+    const correctHiraganaAnswers = normalize(currentWord.hiragana);
 
     const hiraganaMatch = requiresHiragana
-      ? userHiraganaNormalized.some((answer) =>
-          correctHiraganaNormalized.includes(answer)
-        )
+      ? userHiraganaAnswers.some((ans) => correctHiraganaAnswers.includes(ans))
       : true;
 
     const correct = meaningMatch && hiraganaMatch;
@@ -99,22 +97,24 @@ export default function QuizPage({
 
   const handleNext = () => {
     const nextIndex = currentIndex + 1;
-
     setUserKanji("");
     setUserHiragana("");
     setShowFeedback(false);
+    setIsCorrect(false);
 
     if (nextIndex < shuffledWords.length) {
       setCurrentIndex(nextIndex);
     } else {
       setShowResult(true);
     }
+
+    setTimeout(() => {
+      kanjiInputRef.current?.focus();
+    }, 0);
   };
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (isComposing) return;
-
-    if (e.key === "Enter") {
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" && !isComposing) {
       e.preventDefault();
       if (!showFeedback) {
         handleSubmit();
@@ -124,7 +124,8 @@ export default function QuizPage({
     }
   };
 
-  if (shuffledWords.length === 0) return <div className="p-4">로딩 중...</div>;
+  if (shuffledWords.length === 0)
+    return <div className="p-4">로딩 중...</div>;
 
   if (showResult) {
     const incorrectAnswers = answers.filter((a) => !a.isCorrect);
@@ -161,7 +162,9 @@ export default function QuizPage({
             </ul>
           </>
         ) : (
-          <p className="text-green-600 font-semibold">모든 문제를 정확히 맞혔어요! 🎉</p>
+          <p className="text-green-600 font-semibold">
+            모든 문제를 정확히 맞혔어요! 🎉
+          </p>
         )}
 
         <button
@@ -175,7 +178,11 @@ export default function QuizPage({
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto">
+    <div
+      className="p-4 max-w-md mx-auto"
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
       <div className="mb-4">
         <p className="text-sm text-gray-500">
           문제 {currentIndex + 1} / {shuffledWords.length}
@@ -191,7 +198,6 @@ export default function QuizPage({
         onChange={(e) => setUserKanji(e.target.value)}
         onCompositionStart={() => setIsComposing(true)}
         onCompositionEnd={() => setIsComposing(false)}
-        onKeyDown={onKeyDown}
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
       />
@@ -202,7 +208,6 @@ export default function QuizPage({
         onChange={(e) => setUserHiragana(e.target.value)}
         onCompositionStart={() => setIsComposing(true)}
         onCompositionEnd={() => setIsComposing(false)}
-        onKeyDown={onKeyDown}
         className="w-full mb-4 p-2 border rounded"
         disabled={showFeedback}
       />
@@ -233,8 +238,8 @@ export default function QuizPage({
           </div>
           <button
             onClick={handleNext}
-            onKeyDown={onKeyDown}
             className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 w-full"
+            autoFocus
           >
             다음 문제
           </button>
@@ -243,4 +248,3 @@ export default function QuizPage({
     </div>
   );
 }
-
