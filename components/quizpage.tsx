@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export type Word = {
   kanji: string;
@@ -34,6 +34,7 @@ export default function QuizPage({
   const [isCorrect, setIsCorrect] = useState(false);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
   const [showResult, setShowResult] = useState(false);
+  const isComposing = useRef(false);
 
   useEffect(() => {
     const shuffled = shuffle(words);
@@ -42,16 +43,16 @@ export default function QuizPage({
 
   const currentWord = shuffledWords[currentIndex];
 
+  const normalize = (text: string) =>
+    text
+      .trim()
+      .replace(/\s/g, "")
+      .split(/[,\s]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
   const handleSubmit = () => {
     if (!currentWord) return;
-
-    const normalize = (text: string) =>
-      text
-        .trim()
-        .replace(/\s/g, "")
-        .split(/[,\s]+/)
-        .map((s) => s.trim())
-        .filter(Boolean);
 
     const userAnswers = normalize(userKanji);
     const correctAnswers = normalize(currentWord.meaning);
@@ -71,7 +72,6 @@ export default function QuizPage({
           correctHiraganaNormalized.includes(answer)
         )
       : true;
-
 
     const correct = meaningMatch && hiraganaMatch;
 
@@ -99,6 +99,20 @@ export default function QuizPage({
       setCurrentIndex(nextIndex);
     } else {
       setShowResult(true);
+    }
+  };
+
+  const handleKanjiKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !isComposing.current && !showFeedback) {
+      e.preventDefault();
+      handleSubmit();
+    }
+  };
+
+  const handleHiraganaKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && !isComposing.current && showFeedback) {
+      e.preventDefault();
+      handleNext();
     }
   };
 
@@ -132,7 +146,6 @@ export default function QuizPage({
           <p className="text-green-600 font-semibold">모든 문제를 정확히 맞혔어요! 🎉</p>
         )}
 
-        {/* 🌀 처음으로 돌아가기 버튼 */}
         <button
           onClick={onBack}
           className="mt-6 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
@@ -157,7 +170,9 @@ export default function QuizPage({
         placeholder="뜻 입력"
         value={userKanji}
         onChange={(e) => setUserKanji(e.target.value)}
-        onKeyDown={(e) => {
+        onKeyDown={handleKanjiKeyDown}
+        onCompositionStart={() => { isComposing.current = true; }}
+        onCompositionEnd={() => { isComposing.current = false; }}
         className="w-full mb-2 p-2 border rounded"
         disabled={showFeedback}
       />
@@ -166,6 +181,9 @@ export default function QuizPage({
         placeholder="히라가나 입력"
         value={userHiragana}
         onChange={(e) => setUserHiragana(e.target.value)}
+        onKeyDown={handleHiraganaKeyDown}
+        onCompositionStart={() => { isComposing.current = true; }}
+        onCompositionEnd={() => { isComposing.current = false; }}
         className="w-full mb-4 p-2 border rounded"
         disabled={showFeedback}
       />
