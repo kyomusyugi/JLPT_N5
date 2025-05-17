@@ -27,7 +27,7 @@ export const words_all: Word[] = [
   { kanji: "セーター", hiragana: "", meaning: "스웨터" },
   { kanji: "聞く", hiragana: "きく", meaning: "듣다, 묻다" },
   { kanji: "お父さん", hiragana: "おとうさん", meaning: "아버지" },
-  { kanji: "コビー", hiragana: "", meaning: "복사" },
+  { kanji: "コピー", hiragana: "", meaning: "복사" },
   { kanji: "風", hiragana: "かぜ", meaning: "바람" },
   { kanji: "庭", hiragana: "にわ", meaning: "정원, 뜰, 마당" },
   { kanji: "二つ", hiragana: "ふたつ", meaning: "두 개, 둘" },
